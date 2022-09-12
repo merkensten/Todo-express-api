@@ -7,11 +7,12 @@ import {
   removeTodoFromDB,
 } from "./todo.services.js";
 
-// @desc    Create user
-// @route   POST /api/user
+// @desc    Create todo
+// @route   POST /api/todo
 // @access  Public
 const createTodo = async (req, res) => {
-  const { user, text } = req.body;
+  const { text } = req.body;
+  const { user } = req.query;
   try {
     const response = await addTodoToDB(user, text);
     res.status(StatusCodes.CREATED).send(response);
@@ -39,20 +40,18 @@ const getTodos = async (req, res) => {
 // @desc    Update todo
 // @route   PUT /api/todo:id
 // @access  Private
-const updateTodo = (req, res) => {
+const updateTodo = async (req, res) => {
+  const { text, completed } = req.body;
+  const user = req.query.user;
+  const todoId = req.params.todoId;
   try {
     if (!req.body) {
       res
         .status(StatusCodes.BAD_REQUEST)
         .send({ message: "Content can not be empty!" });
     }
+    const response = await updateTodoInDB(todoId, user, text, completed);
 
-    const response = updateTodoInDB(
-      req.params.todoId,
-      req.body.user,
-      req.body.text,
-      req.body.completed
-    );
     res.status(StatusCodes.OK).send(response);
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
@@ -67,10 +66,10 @@ const updateTodo = (req, res) => {
 // @desc    Delete todo
 // @route   DELETE /api/todo:id
 // @access  Private
-const deleteTodo =  (req, res) => {
+const deleteTodo = async (req, res) => {
   const user = req.query.userId;
   try {
-    const response = removeTodoFromDB(req.params.todoId, user);
+    const response = await removeTodoFromDB(req.params.todoId, user);
     res.status(StatusCodes.OK).send(response);
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({

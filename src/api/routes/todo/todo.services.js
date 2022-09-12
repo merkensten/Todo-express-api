@@ -18,9 +18,11 @@ const addTodoToDB = (user, text) => {
 const updateTodoInDB = async (todoId, user, text, completed) => {
   const todo = await TodoModel.findById(todoId);
 
-  const todoUser = todo.user;
+  if (!todo) {
+    return "Todo not found";
+  }
 
-  if (todoUser.toString() !== user) {
+  if (todo.user.toString() !== user) {
     return { message: "You are not authorized to update this todo", todoUser };
   }
 
@@ -37,16 +39,16 @@ const updateTodoInDB = async (todoId, user, text, completed) => {
   return dbResponse;
 };
 
-// denna behöver göras klart
+
 const removeTodoFromDB = async (todoId, user) => {
   const todo = await TodoModel.findById(todoId);
 
   if (!todo) {
-    return { message: "You are not authorized to delete this todo" };
+    return "Todo not found";
   }
 
   if (todo.user.toString() !== user) {
-    return { message: "You are not authorized to update this todo" };
+    return "You are not authorized to update this todo";
   }
 
   const deletedTodo = await TodoModel.findByIdAndDelete(todoId);
