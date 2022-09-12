@@ -1,17 +1,20 @@
-import StatusCodes from '../../helpers/StatusCodes.js';
+import StatusCodes from "../../helpers/StatusCodes.js";
 import {
   addUserToDB,
   getAllUsersFromDB,
   getUserFromDB,
-  getUserByUsernameFromDB,
   updateUserInDB,
   removeUserFromDB,
   loginUserAndGenerateToken,
-} from './User.services.js';
+} from "./User.services.js";
 
+// @desc    Create user
+// @route   POST /api/user
+// @access  Public
 const createUser = async (req, res) => {
+  const { username, password, userLevel } = req.body;
   try {
-    const response = await addUserToDB(req.body.username, req.body.password);
+    const response = await addUserToDB(username, password, userLevel);
     res.status(StatusCodes.CREATED).send(response);
   } catch (err) {
     res
@@ -20,6 +23,9 @@ const createUser = async (req, res) => {
   }
 };
 
+// @desc    Get All users
+// @route   GET /api/user
+// @access  Private
 const getAllUsers = async (_, res) => {
   try {
     const response = await getAllUsersFromDB();
@@ -31,6 +37,9 @@ const getAllUsers = async (_, res) => {
   }
 };
 
+// @desc    Get user with id
+// @route   GET /api/user:id
+// @access  Private
 const getUserWithId = async (req, res) => {
   try {
     const response = await getUserFromDB(req.params.userId);
@@ -38,37 +47,22 @@ const getUserWithId = async (req, res) => {
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
       message:
-        'Error occured while trying to retrive user with id:' +
+        "Error occured while trying to retrive user with id:" +
         req.params.userId,
       error: error.message,
     });
   }
 };
 
-const getUserWithUsernameQuery = async (req, res) => {
-  try {
-    const response = await getUserByUsernameFromDB(req.query.username);
-    response.length > 0
-      ? res.status(StatusCodes.OK).send(response)
-      : res.status(StatusCodes.NOT_FOUND).send({
-          message: 'Could not find a user with username: ' + req.query.username,
-        });
-  } catch (err) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
-      message:
-        'Error occured while trying to retrive user with username:' +
-        req.query.username,
-      error: err.message,
-    });
-  }
-};
-
+// @desc    Update user
+// @route   PUT /api/user:id
+// @access  Private
 const updateUser = async (req, res) => {
   try {
     if (!req.body) {
       res
         .status(StatusCodes.BAD_REQUEST)
-        .send({ message: 'Content can not be empty!' });
+        .send({ message: "Content can not be empty!" });
     }
 
     const response = await updateUserInDB(
@@ -80,13 +74,16 @@ const updateUser = async (req, res) => {
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
       message:
-        'Error occured while trying to update user with id:' +
+        "Error occured while trying to update user with id:" +
         req.params.userId,
       error: err.message,
     });
   }
 };
 
+// @desc    Delete user
+// @route   DELETE /api/user:id
+// @access  Private
 const deleteUser = async (req, res) => {
   try {
     const response = await removeUserFromDB(req.params.userId);
@@ -96,13 +93,16 @@ const deleteUser = async (req, res) => {
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
       message:
-        'Error occured while trying to delete user with id:' +
+        "Error occured while trying to delete user with id:" +
         req.params.userId,
       error: err.message,
     });
   }
 };
 
+// @desc    Login user
+// @route   POST /api/user/login
+// @access  Private
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
@@ -120,7 +120,6 @@ export default {
   createUser,
   getAllUsers,
   getUserWithId,
-  getUserWithUsernameQuery,
   updateUser,
   deleteUser,
   loginUser,

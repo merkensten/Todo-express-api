@@ -1,10 +1,11 @@
-import UserModel from './user.model.js';
-import { BadRequestError, UnAuthenticatedError } from '../../errors/index.js';
+import UserModel from "./user.model.js";
+import { BadRequestError, UnAuthenticatedError } from "../../errors/index.js";
 
-const addUserToDB = (username, password) => {
+const addUserToDB = (username, password, userLevel) => {
   const user = new UserModel({
     username,
     password,
+    userLevel,
   });
 
   return user.save();
@@ -16,10 +17,6 @@ const getAllUsersFromDB = () => {
 
 const getUserFromDB = (userId) => {
   return UserModel.findById(userId);
-};
-
-const getUserByUsernameFromDB = (username) => {
-  return UserModel.find({ username });
 };
 
 const updateUserInDB = (userId, username, password) => {
@@ -41,19 +38,19 @@ const removeUserFromDB = (userId) => {
 
 const loginUserAndGenerateToken = async (username, password) => {
   if (!username || !password) {
-    throw new BadRequestError('Please provide all values');
+    throw new BadRequestError("Please provide all values");
   }
 
-  const user = await UserModel.findOne({ username }).select('+password');
+  const user = await UserModel.findOne({ username }).select("+password");
 
   if (!user) {
-    throw new UnAuthenticatedError('Invalid Credentials');
+    throw new UnAuthenticatedError("Invalid Credentials");
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
 
   if (!isPasswordCorrect) {
-    throw new UnAuthenticatedError('Invalid Credentials');
+    throw new UnAuthenticatedError("Invalid Credentials");
   }
 
   const token = user.createJWT();
@@ -68,7 +65,6 @@ export {
   addUserToDB,
   getAllUsersFromDB,
   getUserFromDB,
-  getUserByUsernameFromDB,
   updateUserInDB,
   removeUserFromDB,
   loginUserAndGenerateToken,
